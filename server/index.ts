@@ -27,6 +27,24 @@ app.use(express.json());
 app.use("/api", cors({ origin: allowedOrigins, credentials: true }));
 
 // Auth0 login. Adds /logout and /callback and keeps the session in a cookie
+// app.use(
+//   auth({
+//     authRequired: false,
+//     auth0Logout: true,
+//     secret: process.env.SECRET,
+//     baseURL: process.env.BASE_URL,
+//     clientID: process.env.CLIENT_ID,
+//     clientSecret: process.env.CLIENT_SECRET,
+//     issuerBaseURL: process.env.ISSUER_BASE_URL,
+//     authorizationParams: {
+//       response_type: "code",
+//       scope: "openid profile email",
+//       connection: "okta-corp",
+//     },
+//     logoutParams: { federated: "" },
+//     routes: { login: false, postLogoutRedirect: frontendUrl },
+//   }),
+// );
 app.use(
   auth({
     authRequired: false,
@@ -35,16 +53,18 @@ app.use(
     baseURL: process.env.BASE_URL,
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
+    // clientAuthMethod: "client_secret_post", // only if step 2 showed "Post"
     issuerBaseURL: process.env.ISSUER_BASE_URL,
     authorizationParams: {
       response_type: "code",
       scope: "openid profile email",
-      connection: "okta-corp",
+      connection: process.env.OKTA_CONNECTION,
     },
-    logoutParams: { federated: "" },
+    logoutParams: { federated: "" }, // also signs out of Okta; remove to keep the Okta session
     routes: { login: false, postLogoutRedirect: frontendUrl },
   }),
 );
+
 
 // Log in, then go back to the React app. Only paths like /dashboard are allowed
 app.get("/login", (req, res) => {
